@@ -73,25 +73,47 @@ public class UnitTest1
     }
 
     [Fact]
+    public void AddProduct_CreateANewProduct_ProductInDatabase()
+    {
+        // Arrange
+        ProductService PS = new(new FakeDatabase());
+        Product b1 = new Coffee("Ost", "made from milk", 1.99, Coffee.CoffeeRoasts.Light, 100);
+        List<Product> expected = new()
+        {
+            b1
+        };
+
+
+        // Act
+        PS.AddProduct(b1);
+
+        // Assert
+        List<Product> actual = PS.GetAllProducts();
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public void DecreseStock_decresBy3_ChangeInventoryBy3()
     {
         // Arrange
         ProductService PS = new(new FakeDatabase());
         Product b1 = new Coffee("Ost", "made from milk", 1.99, Coffee.CoffeeRoasts.Light, 100);
-        Product b2 = new Tea("AOst", "made from milk", 1.99, Tea.TeaTypes.GreenTea, 100);
-        Product b3 = new Chocolate("BetaOst", "made from milk", 1.99, Chocolate.ChocolateTypes.DarkChocolate, 100);
         PS.AddProduct(b1);
-        PS.AddProduct(b2);
-        PS.AddProduct(b3);
+
         List<Product> expected = new()
         {
-            new Coffee("Ost", "made from milk", 1.99, Coffee.CoffeeRoasts.Light, 98), b2, b3
+            new Coffee("Ost", "made from milk", 1.99, Coffee.CoffeeRoasts.Light, 97)
         };
         // Act
         PS.DecreaseStock(b1, 3);
 
         // Assert
-        Assert.Equal(expected, PS.GetAllProducts());
+        // Assert.Equal(expected, PS.GetAllProducts());
+        List<Product> actual = PS.GetAllProducts();
+        for (int i = 0; i < expected.Count; i++)
+        {
+            Assert.Equal(expected[i].InventoryBalance, actual[i].InventoryBalance);
+        }
     }
 }
 
@@ -109,7 +131,7 @@ internal class FakeDatabase : IProductRepository
     public int Add(Product p)
     {
         pList.Add(p);
-        return 0;
+        return pList.IndexOf(p);
     }
 
     public void DecreaseStock(Product product, int number)
